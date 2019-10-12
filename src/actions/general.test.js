@@ -30,7 +30,6 @@ describe('Actions.General', () => {
         Client4.setUrl('notarealurl');
 
         const response = {
-            status: 'OK',
             error: 'ping error',
             status_code: 401,
         };
