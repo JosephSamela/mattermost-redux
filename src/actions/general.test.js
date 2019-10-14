@@ -4,6 +4,7 @@
 import assert from 'assert';
 import nock from 'nock';
 
+import {FormattedError} from './helpers.js';
 import {GeneralTypes} from 'action_types';
 import * as Actions from 'actions/general';
 import {Client4} from 'client';
@@ -29,20 +30,20 @@ describe('Actions.General', () => {
         const serverUrl = Client4.getUrl();
         Client4.setUrl('notarealurl');
 
-        const response = {
-            error: 'ping error',
-            status_code: 401,
-        };
+        const pingError = new FormattedError(
+            'mobile.server_ping_failed',
+            'Cannot connect to the server. Please check your server URL and internet connection.'
+        );
 
         nock(Client4.getBaseRoute()).
             get('/system/ping').
             query(true).
-            reply(401, response);
+            reply({error: 'ping error', status_code: 401, code: 401});
 
-        const {data} = await Actions.getPing()(store.dispatch, store.getState);
+            const {error} = await Actions.getPing()(store.dispatch, store.getState);
 
         Client4.setUrl(serverUrl);
-        assert.deepEqual(data, response);
+        assert.deepEqual(error, pingError);
     });
 
     it('getPing', async () => {
@@ -57,7 +58,6 @@ describe('Actions.General', () => {
             reply(200, response);
 
         const {data} = await Actions.getPing()(store.dispatch, store.getState);
-        // console.log(data);
         assert.deepEqual(data, response);
     });
 
